@@ -17,4 +17,5 @@ class  AppWindow{
 
     private:
         HWND m_hwnd;
+        HINSTANCE m_hInstance;
 };

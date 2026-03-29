@@ -1,18 +1,25 @@
 #include <Windows.h>
 #include "AppWindow.h"
 
-AppWindow::AppWindow() : m_hwnd(nullptr) {
-}
+AppWindow::AppWindow() : m_hwnd(nullptr), m_hInstance(nullptr){}
 
 int AppWindow::Create(HINSTANCE hInstance, int nCmdShow) {
+
+  m_hInstance = hInstance;
   const wchar_t CLASS_NAME[] = L"Machine Engine Window";
   WNDCLASSEXW wc = {};
   wc.cbSize = sizeof(WNDCLASSEX);
   wc.lpfnWndProc = AppWindow::WindowProc;
   wc.hInstance = hInstance;
+  wc.lpszMenuName = NULL;
   wc.lpszClassName = CLASS_NAME;
 
-  RegisterClassExW(&wc);    // Create the window.
+  if(!RegisterClassExW(&wc))    //Create the window.
+  {
+    DWORD dwError = GetLastError();
+    if(dwError != ERROR_CLASS_ALREADY_EXISTS)
+      return HRESULT_FROM_WIN32(dwError);
+  }
 
   m_hwnd = CreateWindowExW(
       0,                              // Optional window styles.
@@ -25,20 +32,21 @@ int AppWindow::Create(HINSTANCE hInstance, int nCmdShow) {
 
       NULL,       // Parent window    
       NULL,       // Menu
-      hInstance,  // Instance handle
+      m_hInstance,  // Instance handle
       this        // Additional application data
       );
 
-  if (m_hwnd == nullptr)
-    return 0;
+  if (m_hwnd == nullptr) {
+    DWORD dwError = GetLastError();
+    return HRESULT_FROM_WIN32(dwError);
+  }
 
   ShowWindow(m_hwnd, nCmdShow);
 
   // Run the message loop.
 
   MSG msg = { };
-  while (GetMessage(&msg, NULL, 0, 0) > 0)
-  {
+  while (GetMessage(&msg, NULL, 0, 0) > 0) {
     TranslateMessage(&msg);
     DispatchMessage(&msg);
   }
@@ -65,19 +73,24 @@ LRESULT AppWindow::HandleWndProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
   switch(uMsg) 
   {
-    case WM_PAINT:
-      {
-        PAINTSTRUCT ps;
-        HDC hdc = BeginPaint(m_hwnd, &ps);
-        FillRect(hdc, &ps.rcPaint, (HBRUSH)(COLOR_WINDOW+1));
-        EndPaint(m_hwnd, &ps);
-        return 0;
-      }
+    case WM_PAINT: {
+                     PAINTSTRUCT ps;
+                     HDC hdc = BeginPaint(m_hwnd, &ps);
+                     FillRect(hdc, &ps.rcPaint, (HBRUSH)(COLOR_WINDOW+1));
+                     EndPaint(m_hwnd, &ps);
+                     return 0;
+                   }
+    case WM_CLOSE: {
+                     if(MessageBoxW(m_hwnd, L"Really Quit?", L"Machine", MB_OKCANCEL) == IDOK) {
+                       DestroyWindow(m_hwnd);
+                     }
+                     return 0;
+                   }
     case WM_DESTROY:
-      {
-        PostQuitMessage(0);
-        return 0;
-      }
+                   {
+                     PostQuitMessage(0);
+                     return 0;
+                   }
   }
 
   return DefWindowProcW(m_hwnd, uMsg, wParam, lParam);
