@@ -1,0 +1,3 @@
+D:/Repo/Machine/build/CMakeFiles/Machine.dir
+D:/Repo/Machine/build/CMakeFiles/edit_cache.dir
+D:/Repo/Machine/build/CMakeFiles/rebuild_cache.dir

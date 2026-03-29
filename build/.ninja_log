@@ -1,0 +1,9 @@
+# ninja log v7
+6	612	7964419892662312	CMakeFiles/Machine.dir/src/main.cpp.obj	a4530647aeedadba
+18	598	7964425544656066	CMakeFiles/Machine.dir/src/app.cpp.obj	fd0a83eef0087436
+599	1031	7964425550448874	Machine.exe	90ace381ea5d2dc
+3	191	7964470272590598	build.ninja	eddb0d9b9e826cd5
+3	191	7964470272590598	D:/Repo/Machine/build/cmake_install.cmake	eddb0d9b9e826cd5
+18	602	7964470273341728	CMakeFiles/Machine.dir/src/main.cpp.obj	a4530647aeedadba
+21	642	7964470273371728	CMakeFiles/Machine.dir/src/window.cpp.obj	2ad94e4af4ecf276
+642	1079	7964470279577347	Machine.exe	1358257c8535aeaf
