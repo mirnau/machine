@@ -1,16 +1,16 @@
 #include <Windows.h>
 #include "AppWindow.h"
 
-AppWindow::AppWindow() : m_hwnd(nullptr), m_hInstance(nullptr){}
+AppWindow::AppWindow(HINSTANCE hInstance, int nCmdShow) 
+  : m_hInstance(hInstance), m_nCmdShow(nCmdShow), m_hwnd(nullptr){} 
 
-int AppWindow::Create(HINSTANCE hInstance, int nCmdShow) {
+int AppWindow::Create() {
 
-  m_hInstance = hInstance;
   const wchar_t CLASS_NAME[] = L"Machine Engine Window";
   WNDCLASSEXW wc = {};
   wc.cbSize = sizeof(WNDCLASSEX);
   wc.lpfnWndProc = AppWindow::WindowProc;
-  wc.hInstance = hInstance;
+  wc.hInstance = m_hInstance;
   wc.lpszMenuName = NULL;
   wc.lpszClassName = CLASS_NAME;
 
@@ -41,15 +41,7 @@ int AppWindow::Create(HINSTANCE hInstance, int nCmdShow) {
     return HRESULT_FROM_WIN32(dwError);
   }
 
-  ShowWindow(m_hwnd, nCmdShow);
-
-  // Run the message loop.
-
-  MSG msg = { };
-  while (GetMessage(&msg, NULL, 0, 0) > 0) {
-    TranslateMessage(&msg);
-    DispatchMessage(&msg);
-  }
+  ShowWindow(m_hwnd, m_nCmdShow);
 
   return 0;
 }
@@ -60,6 +52,7 @@ LRESULT CALLBACK AppWindow::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPAR
   if(uMsg == WM_NCCREATE) {
     auto* cs = reinterpret_cast<CREATESTRUCT*>(lParam);
     instance = static_cast<AppWindow*>(cs->lpCreateParams);
+    instance->m_hwnd = hwnd;
     SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(instance));
   }
 

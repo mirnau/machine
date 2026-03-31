@@ -59,9 +59,39 @@ build CMakeFiles/Machine.dir/src/main.cpp.obj: CXX_COMPILER__Machine_unscanned_D
   TARGET_PDB = Machine.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\Machine.dir
 
-build CMakeFiles/Machine.dir/src/window.cpp.obj: CXX_COMPILER__Machine_unscanned_Debug D$:/Repo/Machine/src/window.cpp || cmake_object_order_depends_target_Machine
+build CMakeFiles/Machine.dir/src/AppWindow.cpp.obj: CXX_COMPILER__Machine_unscanned_Debug D$:/Repo/Machine/src/AppWindow.cpp || cmake_object_order_depends_target_Machine
   CONFIG = Debug
-  DEP_FILE = CMakeFiles\Machine.dir\src\window.cpp.obj.d
+  DEP_FILE = CMakeFiles\Machine.dir\src\AppWindow.cpp.obj.d
+  FLAGS = -O0 -g -Xclang -gcodeview -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd
+  OBJECT_DIR = CMakeFiles\Machine.dir
+  OBJECT_FILE_DIR = CMakeFiles\Machine.dir\src
+  TARGET_COMPILE_PDB = CMakeFiles\Machine.dir\
+  TARGET_PDB = Machine.pdb
+  TARGET_SUPPORT_DIR = CMakeFiles\Machine.dir
+
+build CMakeFiles/Machine.dir/src/Graphics.cpp.obj: CXX_COMPILER__Machine_unscanned_Debug D$:/Repo/Machine/src/Graphics.cpp || cmake_object_order_depends_target_Machine
+  CONFIG = Debug
+  DEP_FILE = CMakeFiles\Machine.dir\src\Graphics.cpp.obj.d
+  FLAGS = -O0 -g -Xclang -gcodeview -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd
+  OBJECT_DIR = CMakeFiles\Machine.dir
+  OBJECT_FILE_DIR = CMakeFiles\Machine.dir\src
+  TARGET_COMPILE_PDB = CMakeFiles\Machine.dir\
+  TARGET_PDB = Machine.pdb
+  TARGET_SUPPORT_DIR = CMakeFiles\Machine.dir
+
+build CMakeFiles/Machine.dir/src/Machine.cpp.obj: CXX_COMPILER__Machine_unscanned_Debug D$:/Repo/Machine/src/Machine.cpp || cmake_object_order_depends_target_Machine
+  CONFIG = Debug
+  DEP_FILE = CMakeFiles\Machine.dir\src\Machine.cpp.obj.d
+  FLAGS = -O0 -g -Xclang -gcodeview -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd
+  OBJECT_DIR = CMakeFiles\Machine.dir
+  OBJECT_FILE_DIR = CMakeFiles\Machine.dir\src
+  TARGET_COMPILE_PDB = CMakeFiles\Machine.dir\
+  TARGET_PDB = Machine.pdb
+  TARGET_SUPPORT_DIR = CMakeFiles\Machine.dir
+
+build CMakeFiles/Machine.dir/src/Renderer.cpp.obj: CXX_COMPILER__Machine_unscanned_Debug D$:/Repo/Machine/src/Renderer.cpp || cmake_object_order_depends_target_Machine
+  CONFIG = Debug
+  DEP_FILE = CMakeFiles\Machine.dir\src\Renderer.cpp.obj.d
   FLAGS = -O0 -g -Xclang -gcodeview -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd
   OBJECT_DIR = CMakeFiles\Machine.dir
   OBJECT_FILE_DIR = CMakeFiles\Machine.dir\src
@@ -77,11 +107,11 @@ build CMakeFiles/Machine.dir/src/window.cpp.obj: CXX_COMPILER__Machine_unscanned
 #############################################
 # Link the executable Machine.exe
 
-build Machine.exe: CXX_EXECUTABLE_LINKER__Machine_Debug CMakeFiles/Machine.dir/src/main.cpp.obj CMakeFiles/Machine.dir/src/window.cpp.obj
+build Machine.exe: CXX_EXECUTABLE_LINKER__Machine_Debug CMakeFiles/Machine.dir/src/main.cpp.obj CMakeFiles/Machine.dir/src/AppWindow.cpp.obj CMakeFiles/Machine.dir/src/Graphics.cpp.obj CMakeFiles/Machine.dir/src/Machine.cpp.obj CMakeFiles/Machine.dir/src/Renderer.cpp.obj
   CONFIG = Debug
   FLAGS = -O0 -g -Xclang -gcodeview -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd
   LINK_FLAGS = -Xlinker /subsystem:windows -fuse-ld=lld-link
-  LINK_LIBRARIES = -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32 -loldnames
+  LINK_LIBRARIES = -ld3d11.lib  -ldxgi.lib  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32 -loldnames
   OBJECT_DIR = CMakeFiles\Machine.dir
   POST_BUILD = cd .
   PRE_LINK = cd .

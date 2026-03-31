@@ -1,11 +1,12 @@
 #include <Windows.h>
-#include "AppWindow.h"
+#include "Machine.h"
 
 int WINAPI wWinMain(
     HINSTANCE hInstance, 
-    HINSTANCE hPrevInstance, PWSTR lpCmdLine,
+    HINSTANCE hPrevInstance, 
+    PWSTR lpCmdLine,
     int nCmdShow) 
 {
-  AppWindow aw; 
-  return aw.Create(hInstance, nCmdShow);
+  Machine m{hInstance, nCmdShow};
+  return m.Run(); 
 } 
