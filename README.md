@@ -4,3 +4,5 @@ Just your friendly nextdoor game engine learning project.
 
 * WIN32
 * DirectX11
+* CMake
+* Ninja
