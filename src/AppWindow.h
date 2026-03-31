@@ -1,10 +1,12 @@
 #pragma once
 #include <Windows.h>
+#include <functional>
 
 class  AppWindow{
 
         public:
                 HWND m_hwnd;
+                std::function<void(UINT, UINT)> m_onResize;
 
         public:
                 AppWindow();

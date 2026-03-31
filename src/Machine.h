@@ -1,8 +1,9 @@
 //The Main Game Engine Application File
 #pragma once
 #include <Windows.h>
-#include "Graphics.h"
+#include "DX11.h"
 #include "AppWindow.h"
+#include "Renderer.h"
 class Machine {
   public:
     Machine(HINSTANCE hInstance, int nCmdShow);
@@ -12,11 +13,11 @@ class Machine {
     Machine& operator=(const Machine& m) = delete;
     int Run();
     void Update();
-    void Render();
 
   private:
-    Graphics::DX11 m_graphics;
     AppWindow m_mainWindow;
+    Graphics::DX11 m_graphics;
+    Graphics::Renderer m_renderer;
     HINSTANCE m_hInstance;
     int m_nCmdShow;
     bool m_isRunning;

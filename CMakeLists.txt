@@ -5,7 +5,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_executable(Machine WIN32
     src/main.cpp
     src/AppWindow.cpp
-    src/Graphics.cpp
+    src/DX11.cpp
     src/Machine.cpp
     src/Renderer.cpp
 )
