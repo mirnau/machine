@@ -5,6 +5,7 @@
 #include <dxgi.h>
 #include <winerror.h>
 #include <winnt.h>
+#include "Failure.h"
 #include "MiniMath.h"
 #include "Vertex.h"
 
@@ -13,10 +14,8 @@ Graphics::Renderer::Renderer(Graphics::DX11& dx) : m_dx(dx) {}
 HRESULT Graphics::Renderer::Init(uint2 size) {
   HRESULT hr = CreateRVT();
   if(FAILED(hr))return hr;
-  hr = CompileShaders();
-  if(FAILED(hr)) return hr;
-  hr = CreateInputLayout();
-  if(FAILED(hr)) return hr;
+  CompileShaders();
+  CreateInputLayout();
   hr = CreateVertexBuffer();
   if(FAILED(hr)) return hr;
 
@@ -82,7 +81,7 @@ void Graphics::Renderer::SetViewport(uint2 size) {
   m_dx.GetContext()->RSSetViewports(1, &m_viewport);
 }
 
-HRESULT Graphics::Renderer::CompileShaders() {
+void Graphics::Renderer::CompileShaders() {
 
   ComPtr<ID3DBlob> errorBlob;
 
@@ -95,22 +94,15 @@ HRESULT Graphics::Renderer::CompileShaders() {
                                   &m_vsBlob, 
                                   &errorBlob
                                   );
-    if(FAILED(hr)) {
-      if(errorBlob)
-          MessageBoxA(nullptr, (char*)errorBlob->GetBufferPointer(), "Shader Error", MB_OK);
-      else
-          MessageBoxA(nullptr, "errorBlob is null - file not found?", "Shader Error", MB_OK);
-      return hr;
-  }
-  if(FAILED(hr)) return hr;
+
+  if(FAILED(hr)) 
+    throw Machine::Failure::Shader(errorBlob.Get());
 
   hr = m_dx.GetDevice()->CreateVertexShader(
     m_vsBlob->GetBufferPointer(),
     m_vsBlob->GetBufferSize(),
     nullptr, &m_vertexShader
   );
-
-  if(FAILED(hr)) return hr;
 
   ComPtr<ID3DBlob> psBlob;
   hr = D3DCompileFromFile(pxPath,
@@ -122,30 +114,36 @@ HRESULT Graphics::Renderer::CompileShaders() {
                           &psBlob, 
                           &errorBlob
                           );
-  if(FAILED(hr)) return hr;
 
+  if(FAILED(hr))
+    throw Machine::Failure::Shader(errorBlob.Get());
 
-  return m_dx.GetDevice()->CreatePixelShader(
+  hr = m_dx.GetDevice()->CreatePixelShader(
     psBlob->GetBufferPointer(),
     psBlob->GetBufferSize(),
     nullptr,
     &m_pixelShader
   );
+
+  if(FAILED(hr))
+    throw Machine::Failure::Graphics(hr);
 }
 
-HRESULT Graphics::Renderer::CreateInputLayout() {
+void Graphics::Renderer::CreateInputLayout() {
   D3D11_INPUT_ELEMENT_DESC desc[] = {
     {"POSITION", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 0,
       D3D11_INPUT_PER_VERTEX_DATA, 0 
     }
   };
 
-  return m_dx.GetDevice()->CreateInputLayout(
+  HRESULT hr = m_dx.GetDevice()->CreateInputLayout(
     desc, 1,
     m_vsBlob->GetBufferPointer(),
     m_vsBlob->GetBufferSize(),
     &m_inputLayout
   );
+  if(FAILED(hr))
+    throw Machine::Failure::Graphics(hr);
 }
 
 HRESULT Graphics::Renderer::CreateVertexBuffer() {

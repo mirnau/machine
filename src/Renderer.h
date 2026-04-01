@@ -30,8 +30,8 @@ public:
 
 private: 
         HRESULT CreateRVT();
-        HRESULT CompileShaders();
-        HRESULT CreateInputLayout();
+        void CompileShaders();
+        void CreateInputLayout();
         HRESULT CreateVertexBuffer();
 
 private:

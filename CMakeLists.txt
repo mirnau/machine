@@ -6,9 +6,10 @@ add_executable(Machine WIN32
     src/main.cpp
     src/AppWindow.cpp
     src/DX11.cpp
-    src/Machine.cpp
+    src/Engine.cpp
     src/Renderer.cpp
     src/Vertex.cpp
+    src/Failure.cpp
 )
 
 target_link_libraries(
@@ -17,7 +18,8 @@ target_link_libraries(
     dxgi.lib 
     d3dcompiler.lib
 )
-target_compile_features(Machine PRIVATE cxx_std_20)
+target_compile_features(Machine PRIVATE cxx_std_23)
+target_compile_definitions(Machine PRIVATE $<$<CONFIG:Debug>:DEBUG>)
 
 add_custom_command(TARGET Machine POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory

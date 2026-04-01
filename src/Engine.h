@@ -4,17 +4,20 @@
 #include "DX11.h"
 #include "AppWindow.h"
 #include "Renderer.h"
-class Machine {
-  public:
-    Machine(HINSTANCE hInstance, int nCmdShow);
-    Machine(const Machine& m) = delete;
-    Machine(Machine&& m) = delete;
-    ~Machine() = default;
-    Machine& operator=(const Machine& m) = delete;
+
+namespace Machine {
+
+class Engine {
+public:
+    Engine(HINSTANCE hInstance, int nCmdShow);
+    Engine(const Engine& m) = delete;
+    Engine(Engine&& m) = delete;
+    ~Engine() = default;
+    Engine& operator=(const Engine& m) = delete;
     int Run();
     void Update();
 
-  private:
+private:
     AppWindow m_mainWindow;
     Graphics::DX11 m_graphics;
     Graphics::Renderer m_renderer;
@@ -22,8 +25,8 @@ class Machine {
     int m_nCmdShow;
     bool m_isRunning;
 
-  private:
+private:
     int RunGameLoop();
 };
-
+}
 

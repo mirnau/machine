@@ -1,7 +1,8 @@
 #include <Windows.h>
-#include "Machine.h"
+#include "Engine.h"
+#include "DebugConsole.h"
 
-Machine::Machine(HINSTANCE hInstance, int nCmdShow) 
+Machine::Engine::Engine(HINSTANCE hInstance, int nCmdShow) 
   : 
   m_hInstance(hInstance), 
   m_nCmdShow(nCmdShow), 
@@ -11,7 +12,9 @@ Machine::Machine(HINSTANCE hInstance, int nCmdShow)
   m_mainWindow(hInstance, nCmdShow) 
 {}
 
-int Machine::Run() {
+int Machine::Engine::Run() {
+
+  CreateDebugConsole();
 
   if(m_hInstance) {
 
@@ -38,7 +41,7 @@ int Machine::Run() {
   return -1;
 }
 
-int Machine::RunGameLoop() {
+int Machine::Engine::RunGameLoop() {
   MSG msg{};
 
   while(m_isRunning) {
@@ -55,6 +58,6 @@ int Machine::RunGameLoop() {
   return 0;
 }
 
-void Machine::Update() {
+void Machine::Engine::Update() {
 
 }
