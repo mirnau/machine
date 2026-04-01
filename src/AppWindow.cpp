@@ -4,49 +4,49 @@
 #include "AppWindow.h"
 
 AppWindow::AppWindow(HINSTANCE hInstance, int nCmdShow) 
-  : m_hInstance(hInstance), m_nCmdShow(nCmdShow), m_hwnd(nullptr){} 
+: m_hInstance(hInstance), m_nCmdShow(nCmdShow), m_hwnd(nullptr){} 
 
-  int AppWindow::Create() {
+int AppWindow::Create() {
 
-    const wchar_t CLASS_NAME[] = L"Machine Engine Window";
-    WNDCLASSEXW wc = {};
-    wc.cbSize = sizeof(WNDCLASSEX);
-    wc.lpfnWndProc = AppWindow::WindowProc;
-    wc.hInstance = m_hInstance;
-    wc.lpszMenuName = NULL;
-    wc.lpszClassName = CLASS_NAME;
+  const wchar_t CLASS_NAME[] = L"Machine Engine Window";
+  WNDCLASSEXW wc = {};
+  wc.cbSize = sizeof(WNDCLASSEX);
+  wc.lpfnWndProc = AppWindow::WindowProc;
+  wc.hInstance = m_hInstance;
+  wc.lpszMenuName = NULL;
+  wc.lpszClassName = CLASS_NAME;
 
-    if(!RegisterClassExW(&wc))    //Create the window.
-    {
-      DWORD dwError = GetLastError();
-      if(dwError != ERROR_CLASS_ALREADY_EXISTS)
-        return HRESULT_FROM_WIN32(dwError);
-    }
-
-    m_hwnd = CreateWindowExW(
-        0,                              // Optional window styles.
-        CLASS_NAME,                     // Window class
-        L"Learn to Program Windows",    // Window text
-        WS_OVERLAPPEDWINDOW,            // Window style
-
-        // Size and position
-        CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
-
-        NULL,       // Parent window    
-        NULL,       // Menu
-        m_hInstance,  // Instance handle
-        this        // Additional application data
-        );
-
-    if (m_hwnd == nullptr) {
-      DWORD dwError = GetLastError();
+  if(!RegisterClassExW(&wc))    //Create the window.
+  {
+    DWORD dwError = GetLastError();
+    if(dwError != ERROR_CLASS_ALREADY_EXISTS)
       return HRESULT_FROM_WIN32(dwError);
-    }
-
-    ShowWindow(m_hwnd, m_nCmdShow);
-
-    return 0;
   }
+
+  m_hwnd = CreateWindowExW(
+    0,                              // Optional window styles.
+    CLASS_NAME,                     // Window class
+    L"Learn to Program Windows",    // Window text
+    WS_OVERLAPPEDWINDOW,            // Window style
+
+    // Size and position
+    CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
+
+    NULL,       // Parent window    
+    NULL,       // Menu
+    m_hInstance,  // Instance handle
+    this        // Additional application data
+  );
+
+  if (m_hwnd == nullptr) {
+    DWORD dwError = GetLastError();
+    return HRESULT_FROM_WIN32(dwError);
+  }
+
+  ShowWindow(m_hwnd, m_nCmdShow);
+
+  return 0;
+}
 
 LRESULT CALLBACK AppWindow::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
   AppWindow* instance = reinterpret_cast<AppWindow*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
@@ -69,31 +69,34 @@ LRESULT AppWindow::HandleWndProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
   switch(uMsg) 
   {
     case WM_PAINT: {
-                     PAINTSTRUCT ps;
-                     HDC hdc = BeginPaint(m_hwnd, &ps);
-                     FillRect(hdc, &ps.rcPaint, (HBRUSH)(COLOR_WINDOW+1));
-                     EndPaint(m_hwnd, &ps);
-                     return 0;
-                   }
+      PAINTSTRUCT ps;
+      HDC hdc = BeginPaint(m_hwnd, &ps);
+      FillRect(hdc, &ps.rcPaint, (HBRUSH)(COLOR_WINDOW+1));
+      EndPaint(m_hwnd, &ps);
+      return 0;
+    }
     case WM_CLOSE: {
-                     if(MessageBoxW(m_hwnd, L"Really Quit?", L"Machine", MB_OKCANCEL) == IDOK) {
-                       DestroyWindow(m_hwnd);
-                     }
-                     return 0;
-                   }
+      if(MessageBoxW(m_hwnd, L"Really Quit?", L"Machine", MB_OKCANCEL) == IDOK) {
+        DestroyWindow(m_hwnd);
+      }
+      return 0;
+    }
     case WM_DESTROY:
-                   {
-                     PostQuitMessage(0);
-                     return 0;
-                   }
-    case WM_EXITSIZEMOVE: {
-                    if(m_onResize) {
-                      RECT rect;
-                      GetClientRect(m_hwnd, &rect);
-                      m_onResize(rect.right - rect.left, rect.bottom - rect.top);
-                    }
-                    return 0;
-                  }
+      {
+        PostQuitMessage(0);
+        return 0;
+      }
+    case WM_CREATE:
+    case WM_SIZE: {
+      if(m_onResize) {
+        RECT rect;
+        GetClientRect(m_hwnd, &rect);
+        const uint2 size{rect.right - rect.left, rect.bottom - rect.top};
+        m_onResize(size);
+      }
+      return 0; 
+    }
+
   }
 
   return DefWindowProcW(m_hwnd, uMsg, wParam, lParam);

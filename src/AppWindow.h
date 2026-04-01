@@ -1,12 +1,13 @@
 #pragma once
 #include <Windows.h>
 #include <functional>
+#include "MiniMath.h"
 
 class  AppWindow{
 
         public:
                 HWND m_hwnd;
-                std::function<void(UINT, UINT)> m_onResize;
+                std::function<void(uint2)> m_onResize;
 
         public:
                 AppWindow();

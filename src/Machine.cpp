@@ -3,28 +3,33 @@
 
 Machine::Machine(HINSTANCE hInstance, int nCmdShow) 
   : 
-    m_hInstance(hInstance), 
-    m_nCmdShow(nCmdShow), 
-    m_graphics(),
-    m_renderer(m_graphics),
-    m_isRunning(true),
-    m_mainWindow(hInstance, nCmdShow) 
+  m_hInstance(hInstance), 
+  m_nCmdShow(nCmdShow), 
+  m_graphics(),
+  m_renderer(m_graphics),
+  m_isRunning(true),
+  m_mainWindow(hInstance, nCmdShow) 
 {}
 
 int Machine::Run() {
 
   if(m_hInstance) {
+
     if(FAILED(m_mainWindow.Create()))
       return -1;
 
-    m_mainWindow.m_onResize = [this](UINT w, UINT h) {
-      m_renderer.Resize(w, h);
+    m_mainWindow.m_onResize = [this](uint2 size) {
+      m_renderer.Resize(size);
     };
 
     if(FAILED(m_graphics.Init(m_mainWindow.m_hwnd)))
       return -1;
 
-    if(FAILED(m_renderer.Init())) {
+    RECT rect;
+    GetClientRect(m_mainWindow.m_hwnd, &rect);
+    uint2 size{ rect.right - rect.left, rect.bottom - rect.top };
+
+    if(FAILED(m_renderer.Init(size))) {
       return -1;
     }
 

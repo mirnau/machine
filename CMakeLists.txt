@@ -8,6 +8,19 @@ add_executable(Machine WIN32
     src/DX11.cpp
     src/Machine.cpp
     src/Renderer.cpp
+    src/Vertex.cpp
 )
 
-target_link_libraries(Machine PRIVATE d3d11.lib dxgi.lib)
+target_link_libraries(
+    Machine PRIVATE 
+    d3d11.lib 
+    dxgi.lib 
+    d3dcompiler.lib
+)
+target_compile_features(Machine PRIVATE cxx_std_20)
+
+add_custom_command(TARGET Machine POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${CMAKE_SOURCE_DIR}/src/shaders
+    $<TARGET_FILE_DIR:Machine>/shaders
+) 
