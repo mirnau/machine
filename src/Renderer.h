@@ -4,6 +4,7 @@
 #include <wrl/client.h>
 #include <DirectXMath.h>
 #include <d3dcompiler.h>
+#include <functional>
 #include "DX11.h"
 #include "MiniMath.h"
 
@@ -20,19 +21,20 @@ public:
         ~Renderer() = default;
         Renderer& operator=(const Renderer& r) = delete;
 
-        HRESULT Init(uint2 size);
+        void Init(uint2 size);
         void Clear();
         void Present();
         void Render();
         void SetViewport(uint2 size);
-        HRESULT Resize(uint2 size);
+        void Resize(uint2 size);
+        std::function<void(uint2)> GetResizeCallback() { return [this](uint2 size) { Resize(size);};};
         DX11& GetDX11() {return m_dx; };
 
 private: 
-        HRESULT CreateRVT();
+        void CreateRVT();
         void CompileShaders();
         void CreateInputLayout();
-        HRESULT CreateVertexBuffer();
+        void CreateVertexBuffer();
 
 private:
         //INFO: in the case of other driver implementations, 

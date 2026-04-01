@@ -1,12 +1,15 @@
 #include <Windows.h>
 #include <mmeapi.h>
+#include <winnt.h>
 #include <winuser.h>
 #include "AppWindow.h"
+#include "Failure.h"
+#include "MiniMath.h"
 
 AppWindow::AppWindow(HINSTANCE hInstance, int nCmdShow) 
 : m_hInstance(hInstance), m_nCmdShow(nCmdShow), m_hwnd(nullptr){} 
 
-int AppWindow::Create() {
+void AppWindow::Create() {
 
   const wchar_t CLASS_NAME[] = L"Machine Engine Window";
   WNDCLASSEXW wc = {};
@@ -20,7 +23,7 @@ int AppWindow::Create() {
   {
     DWORD dwError = GetLastError();
     if(dwError != ERROR_CLASS_ALREADY_EXISTS)
-      return HRESULT_FROM_WIN32(dwError);
+      throw Machine::Failure::Graphics(HRESULT_FROM_WIN32(dwError));
   }
 
   m_hwnd = CreateWindowExW(
@@ -40,12 +43,10 @@ int AppWindow::Create() {
 
   if (m_hwnd == nullptr) {
     DWORD dwError = GetLastError();
-    return HRESULT_FROM_WIN32(dwError);
+    throw Machine::Failure::Graphics(HRESULT_FROM_WIN32(dwError));
   }
 
   ShowWindow(m_hwnd, m_nCmdShow);
-
-  return 0;
 }
 
 LRESULT CALLBACK AppWindow::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
@@ -89,10 +90,7 @@ LRESULT AppWindow::HandleWndProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
     case WM_CREATE:
     case WM_SIZE: {
       if(m_onResize) {
-        RECT rect;
-        GetClientRect(m_hwnd, &rect);
-        const uint2 size{rect.right - rect.left, rect.bottom - rect.top};
-        m_onResize(size);
+        m_onResize(GetWindowSize());
       }
       return 0; 
     }
@@ -101,4 +99,11 @@ LRESULT AppWindow::HandleWndProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
   return DefWindowProcW(m_hwnd, uMsg, wParam, lParam);
 
-} 
+}
+
+const uint2 AppWindow::GetWindowSize() const {
+  RECT rect;
+  GetClientRect(m_hwnd, &rect);
+  const uint2 size{rect.right - rect.left, rect.bottom - rect.top};
+  return size;
+}

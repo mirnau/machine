@@ -1,17 +1,11 @@
 #include "DX11.h"
+#include "Failure.h"
 #include <winerror.h>
 #include <winnt.h>
 
-int Graphics::DX11::Init(HWND hwnd) {
+void Graphics::DX11::Init(HWND hwnd) {
   this->CreateSwapChainDesc(hwnd);
-  auto hr = this->CreateDeviceAndSwapChain();
-  if(FAILED(hr)){
-    wchar_t buf[64];
-    swprintf_s(buf, L"0x%08X", (unsigned)hr);
-    MessageBoxW(nullptr, buf, L"Device and Swapchain creation failed", MB_OK);
-    return -1;
-  }
-  return 0;
+  this->CreateDeviceAndSwapChain();
 }
 
 void Graphics::DX11::CreateSwapChainDesc(HWND hwnd) {
@@ -31,8 +25,8 @@ void Graphics::DX11::CreateSwapChainDesc(HWND hwnd) {
   };
 }
 
-HRESULT Graphics::DX11::CreateDeviceAndSwapChain() {
-  return  D3D11CreateDeviceAndSwapChain(
+void Graphics::DX11::CreateDeviceAndSwapChain() {
+  HRESULT hr = D3D11CreateDeviceAndSwapChain(
       nullptr,
       D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_HARDWARE,
       nullptr,
@@ -46,6 +40,10 @@ HRESULT Graphics::DX11::CreateDeviceAndSwapChain() {
       &m_featureLevel,
       m_context.GetAddressOf()
       );
+
+  if(FAILED(hr))
+    throw Machine::Failure::Graphics(hr);
+
 }
 
 UINT Graphics::DX11::GetDeviceFlags() {

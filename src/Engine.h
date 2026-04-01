@@ -19,7 +19,7 @@ public:
 
 private:
     AppWindow m_mainWindow;
-    Graphics::DX11 m_graphics;
+    Graphics::DX11 m_dx11;
     Graphics::Renderer m_renderer;
     HINSTANCE m_hInstance;
     int m_nCmdShow;

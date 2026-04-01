@@ -16,8 +16,8 @@ namespace Graphics {
                         ~DX11();
                         DX11& operator=(const DX11&) = delete;
 
-                        int Init(HWND hwnd);
-                        HRESULT CreateDeviceAndSwapChain();
+                        void Init(HWND hwnd);
+                        void CreateDeviceAndSwapChain();
                         void CreateSwapChainDesc(HWND hwnd);
 
                         ID3D11Device* GetDevice() const { return m_device.Get();};

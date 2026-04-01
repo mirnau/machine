@@ -11,31 +11,29 @@
 
 Graphics::Renderer::Renderer(Graphics::DX11& dx) : m_dx(dx) {}
 
-HRESULT Graphics::Renderer::Init(uint2 size) {
-  HRESULT hr = CreateRVT();
-  if(FAILED(hr))return hr;
+void Graphics::Renderer::Init(uint2 size) {
+  CreateRVT();
   CompileShaders();
   CreateInputLayout();
-  hr = CreateVertexBuffer();
-  if(FAILED(hr)) return hr;
-
+  CreateVertexBuffer();
   SetViewport(size);
-
-  return hr;
 }
 
-HRESULT Graphics::Renderer::CreateRVT() {
+void Graphics::Renderer::CreateRVT() {
   ComPtr<ID3D11Texture2D> backBuffer;
   HRESULT hr = m_dx.GetSwapChain()->GetBuffer(
     0, __uuidof(ID3D11Texture2D),
     reinterpret_cast<void**>(backBuffer.GetAddressOf())
   );
-  if (FAILED(hr)) return hr;
+  if (FAILED(hr))
+    throw Machine::Failure::Graphics(hr);
 
   hr = m_dx.GetDevice()->CreateRenderTargetView(
     backBuffer.Get(), nullptr, m_targetView.GetAddressOf()
   );
-  return hr;
+
+  if(FAILED(hr))
+    throw Machine::Failure::Graphics(hr);
 }
 
 void Graphics::Renderer::Clear() {
@@ -60,13 +58,13 @@ void Graphics::Renderer::Render() {
   Present();
 }
 
-HRESULT Graphics::Renderer::Resize(uint2 size) {
+void Graphics::Renderer::Resize(uint2 size) {
   m_targetView.Reset();
   HRESULT hr = m_dx.GetSwapChain()->ResizeBuffers(0, size.w, size.h, DXGI_FORMAT_UNKNOWN, 0);
   if(FAILED(hr))
-    return hr;
+    throw Machine::Failure::Graphics(hr);
   SetViewport(size);
-  return CreateRVT();
+  CreateRVT();
 }
 
 void Graphics::Renderer::SetViewport(uint2 size) {
@@ -146,7 +144,8 @@ void Graphics::Renderer::CreateInputLayout() {
     throw Machine::Failure::Graphics(hr);
 }
 
-HRESULT Graphics::Renderer::CreateVertexBuffer() {
+void Graphics::Renderer::CreateVertexBuffer() {
+
   D3D11_BUFFER_DESC desc{};
   desc.ByteWidth = sizeof(triangleVertices);
   desc.Usage = D3D11_USAGE_IMMUTABLE;
@@ -155,5 +154,7 @@ HRESULT Graphics::Renderer::CreateVertexBuffer() {
   D3D11_SUBRESOURCE_DATA data {};
   data.pSysMem = triangleVertices;
 
-  return m_dx.GetDevice()->CreateBuffer(&desc, &data, m_vertexBuffer.ReleaseAndGetAddressOf());
+  HRESULT hr = m_dx.GetDevice()->CreateBuffer(&desc, &data, m_vertexBuffer.ReleaseAndGetAddressOf());
+  if(FAILED(hr))
+    throw Machine::Failure::Graphics(hr);
 }

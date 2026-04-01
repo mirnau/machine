@@ -17,7 +17,8 @@ class  AppWindow{
                 AppWindow& operator=(const AppWindow& w) = delete;
                 ~AppWindow() = default;
 
-                int Create();
+                void Create();
+                const uint2 GetWindowSize() const;
                 static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
                 LRESULT HandleWndProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 

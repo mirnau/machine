@@ -1,13 +1,14 @@
 #include <Windows.h>
 #include "Engine.h"
 #include "DebugConsole.h"
+#include "Failure.h"
 
 Machine::Engine::Engine(HINSTANCE hInstance, int nCmdShow) 
   : 
   m_hInstance(hInstance), 
   m_nCmdShow(nCmdShow), 
-  m_graphics(),
-  m_renderer(m_graphics),
+  m_dx11(),
+  m_renderer(m_dx11),
   m_isRunning(true),
   m_mainWindow(hInstance, nCmdShow) 
 {}
@@ -18,24 +19,11 @@ int Machine::Engine::Run() {
 
   if(m_hInstance) {
 
-    if(FAILED(m_mainWindow.Create()))
-      return -1;
-
-    m_mainWindow.m_onResize = [this](uint2 size) {
-      m_renderer.Resize(size);
-    };
-
-    if(FAILED(m_graphics.Init(m_mainWindow.m_hwnd)))
-      return -1;
-
-    RECT rect;
-    GetClientRect(m_mainWindow.m_hwnd, &rect);
-    uint2 size{ rect.right - rect.left, rect.bottom - rect.top };
-
-    if(FAILED(m_renderer.Init(size))) {
-      return -1;
-    }
-
+    m_mainWindow.Create();
+    m_mainWindow.m_onResize = m_renderer.GetResizeCallback();
+    m_dx11.Init(m_mainWindow.m_hwnd);   
+    m_renderer.Init(m_mainWindow.GetWindowSize());
+  
     return RunGameLoop();
   } 
   return -1;
