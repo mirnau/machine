@@ -3,6 +3,7 @@
 #include <d3d11.h>
 #include <d3dcommon.h>
 #include <dxgi.h>
+#include <dxgiformat.h>
 #include <winerror.h>
 #include <winnt.h>
 #include "Failure.h"
@@ -129,13 +130,14 @@ void Graphics::Renderer::CompileShaders() {
 
 void Graphics::Renderer::CreateInputLayout() {
   D3D11_INPUT_ELEMENT_DESC desc[] = {
-    {"POSITION", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 0,
-      D3D11_INPUT_PER_VERTEX_DATA, 0 
-    }
+    {"POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0,
+      D3D11_INPUT_PER_VERTEX_DATA, 0 },
+    {"COLOR", 0,DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 16,
+    D3D11_INPUT_PER_VERTEX_DATA, 0}
   };
 
   HRESULT hr = m_dx.GetDevice()->CreateInputLayout(
-    desc, 1,
+    desc, 2,
     m_vsBlob->GetBufferPointer(),
     m_vsBlob->GetBufferSize(),
     &m_inputLayout

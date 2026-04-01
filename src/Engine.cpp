@@ -23,7 +23,7 @@ int Machine::Engine::Run() {
     m_mainWindow.m_onResize = m_renderer.GetResizeCallback();
     m_dx11.Init(m_mainWindow.m_hwnd);   
     m_renderer.Init(m_mainWindow.GetWindowSize());
-  
+
     return RunGameLoop();
   } 
   return -1;
