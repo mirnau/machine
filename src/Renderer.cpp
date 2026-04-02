@@ -55,7 +55,20 @@ void Graphics::Renderer::Render() {
 
   m_angle += 0.01f;
   TransformCB cb;
-  cb.world = DirectX::XMMatrixRotationZ(m_angle);
+  DirectX::XMMATRIX world = DirectX::XMMatrixRotationY(m_angle);
+  DirectX::XMMATRIX view = DirectX::XMMatrixLookAtLH(
+    DirectX::XMVectorSet(0.0f, 0.0f, -2.0f, 1.0f),  // camera position
+    DirectX::XMVectorSet(0.0f, 0.0f,  0.0f, 1.0f),  // look-at target
+    DirectX::XMVectorSet(0.0f, 1.0f,  0.0f, 0.0f)   // up vector
+  );
+  DirectX::XMMATRIX projection = DirectX::XMMatrixPerspectiveFovLH(
+    DirectX::XMConvertToRadians(60.0f),
+    m_viewport.Width / m_viewport.Height,
+    0.1f, 100.0f
+  );
+
+  cb.world = world * view * projection;  
+
   D3D11_MAPPED_SUBRESOURCE mapped{};
   m_dx.GetContext()->Map(m_constantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
   memcpy(mapped.pData, &cb, sizeof(cb));
@@ -112,7 +125,7 @@ void Graphics::Renderer::CompileShaders() {
                                   );
 
   if(FAILED(hr)) {
-   throw Machine::Failure::Shader(hr, errorBlob.Get()); 
+    throw Machine::Failure::Shader(hr, errorBlob.Get()); 
   }
 
   hr = m_dx.GetDevice()->CreateVertexShader(
@@ -133,7 +146,7 @@ void Graphics::Renderer::CompileShaders() {
                           );
 
   if(FAILED(hr)) {
-      throw Machine::Failure::Shader(hr, errorBlob.Get());
+    throw Machine::Failure::Shader(hr, errorBlob.Get());
   }
 
   hr = m_dx.GetDevice()->CreatePixelShader(
@@ -191,7 +204,6 @@ void Graphics::Renderer::CreateConstantBuffer() {
 
   if(FAILED(hr))
     throw Machine::Failure::Graphics(hr);
-
 }
 
 void Graphics::Renderer::CreateDepthBuffer(uint2 size) {
@@ -226,7 +238,7 @@ void Graphics::Renderer::CreateDepthBuffer(uint2 size) {
   dsDesc.DepthFunc = D3D11_COMPARISON_LESS;
 
   hr = m_dx.GetDevice()->CreateDepthStencilState(&dsDesc, m_depthState.GetAddressOf());
-  
+
   if(FAILED(hr))
     throw Machine::Failure::Graphics(hr);
 }
