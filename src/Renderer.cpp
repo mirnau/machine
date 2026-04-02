@@ -1,5 +1,6 @@
 #include "Renderer.h"
 #include "DX11.h"
+#include <DirectXMath.h>
 #include <d3d11.h>
 #include <d3dcommon.h>
 #include <dxgi.h>
@@ -17,6 +18,7 @@ void Graphics::Renderer::Init(uint2 size) {
   CompileShaders();
   CreateInputLayout();
   CreateVertexBuffer();
+  CreateConstantBuffer();
   SetViewport(size);
 }
 
@@ -47,6 +49,16 @@ void Graphics::Renderer::Present() {
 }
 
 void Graphics::Renderer::Render() {
+
+  m_angle += 0.01f;
+  TransformCB cb;
+  cb.world = DirectX::XMMatrixRotationZ(m_angle);
+  D3D11_MAPPED_SUBRESOURCE mapped{};
+  m_dx.GetContext()->Map(m_constantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
+  memcpy(mapped.pData, &cb, sizeof(cb));
+  m_dx.GetContext()->Unmap(m_constantBuffer.Get(), 0);
+  m_dx.GetContext()->VSSetConstantBuffers(0, 1, m_constantBuffer.GetAddressOf());
+
   Clear();
   m_dx.GetContext()->IASetInputLayout(m_inputLayout.Get());
   m_dx.GetContext()->VSSetShader(m_vertexShader.Get(), nullptr, 0);
@@ -94,8 +106,11 @@ void Graphics::Renderer::CompileShaders() {
                                   &errorBlob
                                   );
 
-  if(FAILED(hr)) 
-    throw Machine::Failure::Shader(errorBlob.Get());
+  if(FAILED(hr)) {
+      if (!errorBlob)
+          throw Machine::Failure::Graphics(hr);
+      throw Machine::Failure::Shader(errorBlob.Get());
+  }
 
   hr = m_dx.GetDevice()->CreateVertexShader(
     m_vsBlob->GetBufferPointer(),
@@ -114,8 +129,11 @@ void Graphics::Renderer::CompileShaders() {
                           &errorBlob
                           );
 
-  if(FAILED(hr))
-    throw Machine::Failure::Shader(errorBlob.Get());
+  if(FAILED(hr)) {
+      if (!errorBlob)
+          throw Machine::Failure::Graphics(hr);
+      throw Machine::Failure::Shader(errorBlob.Get());
+  }
 
   hr = m_dx.GetDevice()->CreatePixelShader(
     psBlob->GetBufferPointer(),
@@ -133,7 +151,7 @@ void Graphics::Renderer::CreateInputLayout() {
     {"POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0,
       D3D11_INPUT_PER_VERTEX_DATA, 0 },
     {"COLOR", 0,DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 16,
-    D3D11_INPUT_PER_VERTEX_DATA, 0}
+      D3D11_INPUT_PER_VERTEX_DATA, 0}
   };
 
   HRESULT hr = m_dx.GetDevice()->CreateInputLayout(
@@ -159,4 +177,18 @@ void Graphics::Renderer::CreateVertexBuffer() {
   HRESULT hr = m_dx.GetDevice()->CreateBuffer(&desc, &data, m_vertexBuffer.ReleaseAndGetAddressOf());
   if(FAILED(hr))
     throw Machine::Failure::Graphics(hr);
+}
+
+void Graphics::Renderer::CreateConstantBuffer() {
+  D3D11_BUFFER_DESC desc {};
+  desc.ByteWidth = sizeof(TransformCB);
+  desc.Usage = D3D11_USAGE_DYNAMIC;
+  desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+  desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+  HRESULT hr = m_dx.GetDevice()->CreateBuffer(&desc, nullptr, m_constantBuffer.GetAddressOf());
+
+  if(FAILED(hr))
+    throw Machine::Failure::Graphics(hr);
+
 }
