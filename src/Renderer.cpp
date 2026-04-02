@@ -164,23 +164,22 @@ void Graphics::Renderer::CompileShaders() {
     throw Machine::Failure::Graphics(hr);
 }
 
-void Graphics::Renderer::CreateInputLayout() {
-  D3D11_INPUT_ELEMENT_DESC desc[] = {
-    {"POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0,
-      D3D11_INPUT_PER_VERTEX_DATA, 0 },
-    {"COLOR", 0,DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 16,
-      D3D11_INPUT_PER_VERTEX_DATA, 0}
-  };
+  void Graphics::Renderer::CreateInputLayout() {
+      D3D11_INPUT_ELEMENT_DESC desc[] = {
+          { "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0,  0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+          { "NORMAL",   0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+          { "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+      };
 
-  HRESULT hr = m_dx.GetDevice()->CreateInputLayout(
-    desc, 2,
-    m_vsBlob->GetBufferPointer(),
-    m_vsBlob->GetBufferSize(),
-    &m_inputLayout
-  );
-  if(FAILED(hr))
-    throw Machine::Failure::Graphics(hr);
-}
+      HRESULT hr = m_dx.GetDevice()->CreateInputLayout(
+          desc, 3,
+          m_vsBlob->GetBufferPointer(),
+          m_vsBlob->GetBufferSize(),
+          &m_inputLayout
+      );
+      if (FAILED(hr))
+          throw Machine::Failure::Graphics(hr);
+  }
 
 void Graphics::Renderer::CreateVertexBuffer() {
 
