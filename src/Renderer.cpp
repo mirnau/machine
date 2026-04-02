@@ -15,6 +15,7 @@ Graphics::Renderer::Renderer(Graphics::DX11& dx) : m_dx(dx) {}
 
 void Graphics::Renderer::Init(uint2 size) {
   CreateRVT();
+  CreateDepthBuffer(size);
   CompileShaders();
   CreateInputLayout();
   CreateVertexBuffer();
@@ -42,6 +43,8 @@ void Graphics::Renderer::CreateRVT() {
 void Graphics::Renderer::Clear() {
   m_dx.GetContext()->OMSetRenderTargets(1, m_targetView.GetAddressOf(), nullptr);
   m_dx.GetContext()->ClearRenderTargetView(m_targetView.Get(), m_color);
+  m_dx.GetContext()->ClearDepthStencilView(m_depthView.Get(),D3D11_CLEAR_DEPTH, 1.0f, 0);
+  m_dx.GetContext()->OMSetDepthStencilState(m_depthState.Get(),0);
 } 
 
 void Graphics::Renderer::Present() {
@@ -73,11 +76,13 @@ void Graphics::Renderer::Render() {
 
 void Graphics::Renderer::Resize(uint2 size) {
   m_targetView.Reset();
+  m_depthView.Reset();
   HRESULT hr = m_dx.GetSwapChain()->ResizeBuffers(0, size.w, size.h, DXGI_FORMAT_UNKNOWN, 0);
   if(FAILED(hr))
     throw Machine::Failure::Graphics(hr);
   SetViewport(size);
   CreateRVT();
+  CreateDepthBuffer(size);
 }
 
 void Graphics::Renderer::SetViewport(uint2 size) {
@@ -188,3 +193,41 @@ void Graphics::Renderer::CreateConstantBuffer() {
     throw Machine::Failure::Graphics(hr);
 
 }
+
+void Graphics::Renderer::CreateDepthBuffer(uint2 size) {
+  D3D11_TEXTURE2D_DESC texDesc{};
+  texDesc.Width = size.w;
+  texDesc.Height = size.h;
+  texDesc.MipLevels = 1;
+  texDesc.ArraySize = 1;
+  texDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+  texDesc.SampleDesc.Count = 1;
+  texDesc.Usage = D3D11_USAGE_DEFAULT;
+  texDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+
+  ComPtr<ID3D11Texture2D> depthTexture;
+  HRESULT hr = m_dx.GetDevice()->CreateTexture2D(&texDesc,
+                                                 nullptr,
+                                                 depthTexture.GetAddressOf()
+                                                 );
+  if(FAILED(hr)) 
+    throw Machine::Failure::Graphics(hr);
+
+  hr = m_dx.GetDevice()->CreateDepthStencilView(depthTexture.Get(),
+                                                nullptr,
+                                                m_depthView.GetAddressOf()
+                                                );
+  if(FAILED(hr))
+    throw Machine::Failure::Graphics(hr);
+
+  D3D11_DEPTH_STENCIL_DESC dsDesc{};
+  dsDesc.DepthEnable = TRUE;
+  dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+  dsDesc.DepthFunc = D3D11_COMPARISON_LESS;
+
+  hr = m_dx.GetDevice()->CreateDepthStencilState(&dsDesc, m_depthState.GetAddressOf());
+  
+  if(FAILED(hr))
+    throw Machine::Failure::Graphics(hr);
+}
+
