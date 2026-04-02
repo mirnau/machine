@@ -107,9 +107,7 @@ void Graphics::Renderer::CompileShaders() {
                                   );
 
   if(FAILED(hr)) {
-      if (!errorBlob)
-          throw Machine::Failure::Graphics(hr);
-      throw Machine::Failure::Shader(errorBlob.Get());
+   throw Machine::Failure::Shader(hr, errorBlob.Get()); 
   }
 
   hr = m_dx.GetDevice()->CreateVertexShader(
@@ -130,9 +128,7 @@ void Graphics::Renderer::CompileShaders() {
                           );
 
   if(FAILED(hr)) {
-      if (!errorBlob)
-          throw Machine::Failure::Graphics(hr);
-      throw Machine::Failure::Shader(errorBlob.Get());
+      throw Machine::Failure::Shader(hr, errorBlob.Get());
   }
 
   hr = m_dx.GetDevice()->CreatePixelShader(

@@ -32,17 +32,19 @@ public:
 
   HRESULT GetHResult() const noexcept;
 
-private:
+
   static std::string FormatHResult(HRESULT hr);
+private:
   HRESULT m_hr;
 };
 
 class Failure::Shader : public Failure {
 public:
   Shader(
+    HRESULT hr,
     ID3DBlob* errorBlob,
     std::source_location loc = std::source_location::current()
   );
 };
 
-} // namespace Machine
+}

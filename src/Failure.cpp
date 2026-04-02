@@ -48,8 +48,9 @@ HRESULT Failure::Graphics::GetHResult() const noexcept {
   return m_hr;
 }
 
-Failure::Shader::Shader(ID3DBlob* errorBlob, std::source_location loc)
-  : Failure(errorBlob ? std::string(static_cast<char*>(errorBlob->GetBufferPointer()), errorBlob->GetBufferSize())
-            : "Unknown shader error - no error blob", loc)
-{}
+  Failure::Shader::Shader(HRESULT hr, ID3DBlob* errorBlob, std::source_location loc)
+    : Failure(errorBlob
+        ? std::string(static_cast<char*>(errorBlob->GetBufferPointer()), errorBlob->GetBufferSize())
+        : Failure::Graphics::FormatHResult(hr), loc)
+  {}
 }
