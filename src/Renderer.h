@@ -34,9 +34,11 @@ private:
         void CreateInputLayout();
         void CreateVertexBuffer();
         void CreateConstantBuffer();
-        void CreateDepthBuffer(uint2 size); 
+        void CreateDepthBuffer(uint2 size);
+        void CreateIndexBuffer();
+        void CreateRasterizerState();
         struct TransformCB { DirectX::XMMATRIX world; };
-        
+
 private:
         //INFO: in the case of other driver implementations, 
         //an interface will replace this reference.
@@ -48,16 +50,16 @@ private:
         ComPtr<ID3DBlob> m_vsBlob;
         ComPtr<ID3D11InputLayout> m_inputLayout;
         ComPtr<ID3D11Buffer> m_vertexBuffer;
+        ComPtr<ID3D11Buffer> m_indexBuffer;
         ComPtr<ID3D11Buffer> m_constantBuffer;
         ComPtr<ID3D11DepthStencilView> m_depthView;
         ComPtr<ID3D11DepthStencilState> m_depthState;
+        ComPtr<ID3D11RasterizerState> m_rasterizerState;
         float m_angle{0.0f};
         D3D11_VIEWPORT m_viewport{};
 
         float m_color[4] = { 0.392f, 0.584f, 0.929f, 1.0f };
         const wchar_t* vxPath = L"shaders/VertexShader.hlsl";
         const wchar_t* pxPath = L"shaders/PixelShader.hlsl";
-
-
 };
 }

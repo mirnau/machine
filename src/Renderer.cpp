@@ -19,7 +19,9 @@ void Graphics::Renderer::Init(uint2 size) {
   CompileShaders();
   CreateInputLayout();
   CreateVertexBuffer();
+  CreateIndexBuffer();
   CreateConstantBuffer();
+  CreateRasterizerState();
   SetViewport(size);
 }
 
@@ -41,7 +43,7 @@ void Graphics::Renderer::CreateRVT() {
 }
 
 void Graphics::Renderer::Clear() {
-  m_dx.GetContext()->OMSetRenderTargets(1, m_targetView.GetAddressOf(), nullptr);
+  m_dx.GetContext()->OMSetRenderTargets(1, m_targetView.GetAddressOf(), m_depthView.Get());
   m_dx.GetContext()->ClearRenderTargetView(m_targetView.Get(), m_color);
   m_dx.GetContext()->ClearDepthStencilView(m_depthView.Get(),D3D11_CLEAR_DEPTH, 1.0f, 0);
   m_dx.GetContext()->OMSetDepthStencilState(m_depthState.Get(),0);
@@ -55,7 +57,7 @@ void Graphics::Renderer::Render() {
 
   m_angle += 0.01f;
   TransformCB cb;
-  DirectX::XMMATRIX world = DirectX::XMMatrixRotationY(m_angle);
+  DirectX::XMMATRIX world = DirectX::XMMatrixRotationY(m_angle) * DirectX::XMMatrixRotationX(m_angle * 0.5f);
   DirectX::XMMATRIX view = DirectX::XMMatrixLookAtLH(
     DirectX::XMVectorSet(0.0f, 0.0f, -2.0f, 1.0f),  // camera position
     DirectX::XMVectorSet(0.0f, 0.0f,  0.0f, 1.0f),  // look-at target
@@ -67,7 +69,7 @@ void Graphics::Renderer::Render() {
     0.1f, 100.0f
   );
 
-  cb.world = world * view * projection;  
+  cb.world = DirectX::XMMatrixTranspose(world * view * projection);
 
   D3D11_MAPPED_SUBRESOURCE mapped{};
   m_dx.GetContext()->Map(m_constantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
@@ -81,9 +83,11 @@ void Graphics::Renderer::Render() {
   m_dx.GetContext()->PSSetShader(m_pixelShader.Get(), nullptr, 0);
   UINT stride = sizeof(Vertex);
   UINT offset = 0;
-  m_dx.GetContext()->IASetVertexBuffers(0,1, m_vertexBuffer.GetAddressOf(), &stride, &offset);
+  m_dx.GetContext()->IASetVertexBuffers(0, 1, m_vertexBuffer.GetAddressOf(), &stride, &offset);
+  m_dx.GetContext()->IASetIndexBuffer(m_indexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0);
   m_dx.GetContext()->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-  m_dx.GetContext()->Draw(3,0);
+    m_dx.GetContext()->RSSetState(m_rasterizerState.Get());
+  m_dx.GetContext()->DrawIndexed(36, 0, 0);
   Present();
 }
 
@@ -181,12 +185,12 @@ void Graphics::Renderer::CreateInputLayout() {
 void Graphics::Renderer::CreateVertexBuffer() {
 
   D3D11_BUFFER_DESC desc{};
-  desc.ByteWidth = sizeof(triangleVertices);
+  desc.ByteWidth = sizeof(cubeVertices);
   desc.Usage = D3D11_USAGE_IMMUTABLE;
   desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 
   D3D11_SUBRESOURCE_DATA data {};
-  data.pSysMem = triangleVertices;
+  data.pSysMem = cubeVertices;
 
   HRESULT hr = m_dx.GetDevice()->CreateBuffer(&desc, &data, m_vertexBuffer.ReleaseAndGetAddressOf());
   if(FAILED(hr))
@@ -243,3 +247,27 @@ void Graphics::Renderer::CreateDepthBuffer(uint2 size) {
     throw Machine::Failure::Graphics(hr);
 }
 
+void Graphics::Renderer::CreateIndexBuffer() {
+  D3D11_BUFFER_DESC desc{};
+  desc.ByteWidth = sizeof(cubeIndices);
+  desc.Usage = D3D11_USAGE_IMMUTABLE;
+  desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+
+  D3D11_SUBRESOURCE_DATA data{};
+  data.pSysMem = cubeIndices;
+
+  HRESULT hr = m_dx.GetDevice()->CreateBuffer(&desc, &data, m_indexBuffer.GetAddressOf());
+
+  if(FAILED(hr))
+    throw Machine::Failure::Graphics(hr);
+}
+
+  void Graphics::Renderer::CreateRasterizerState() {
+      D3D11_RASTERIZER_DESC desc{};
+      desc.FillMode = D3D11_FILL_SOLID;
+      desc.CullMode = D3D11_CULL_NONE;
+
+      HRESULT hr = m_dx.GetDevice()->CreateRasterizerState(&desc, m_rasterizerState.GetAddressOf());
+      if (FAILED(hr))
+          throw Machine::Failure::Graphics(hr);
+  }

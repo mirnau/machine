@@ -1,5 +1,5 @@
 cbuffer Transform : register(b0) {
-  matrix world;
+matrix world;
 };
 
 struct VSInput {
